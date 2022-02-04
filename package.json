@@ -1,0 +1,46 @@
+{
+    "name": "google-maps",
+    "version": "0.1.0",
+    "private": false,
+    "dependencies": {
+        "@googlemaps/react-wrapper": "^1.1.22",
+        "react": "^17.0.2",
+        "react-dom": "^17.0.2",
+        "use-deep-compare-effect": "^1.8.1"
+    },
+    "devDependencies": {
+        "@types/google.maps": "^3.47.3",
+        "@types/react": "^17.0.37",
+        "@types/react-dom": "^17.0.11",
+        "autoprefixer": "^10.4.0",
+        "react-scripts": "^4.0.3",
+        "tailwindcss": "^3.0.7",
+        "typescript": "^4.1.2"
+    },
+    "scripts": {
+        "start": "react-scripts start",
+        "build": "react-scripts build",
+        "test": "react-scripts test",
+        "eject": "react-scripts eject",
+        "build-css": "npx tailwindcss -i ./src/css/tailwind-input.css -o ./public/css/tailwind-output.css",
+        "watch-css": "npx tailwindcss -i ./src/css/tailwind-input.css -o ./public/css/tailwind-output.css --watch"
+    },
+    "eslintConfig": {
+        "extends": [
+            "react-app",
+            "react-app/jest"
+        ]
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    }
+}
