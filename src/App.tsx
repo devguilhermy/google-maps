@@ -1,17 +1,17 @@
-import { Itinerary, Map, MapOptions } from './components/Map';
+import { Map, MapOptions } from './components/Map';
 import { Marker } from './components/Marker';
 import { Status, Wrapper } from '@googlemaps/react-wrapper';
+import { toast, ToastContainer } from 'react-toastify';
 import { useState } from 'react';
+import 'react-toastify/dist/ReactToastify.css';
+
+export interface Itinerary {
+    origin?: google.maps.LatLng;
+    destination?: google.maps.LatLng;
+    waypoints?: google.maps.DirectionsWaypoint[];
+}
 
 export default function App() {
-    const render = (status: Status) => {
-        return <h1>{status}</h1>;
-    };
-
-    const [clicks, setClicks] = useState<google.maps.LatLng[]>([]);
-    // const [zoom, setZoom] = useState(3); // initial zoom
-    // const [center, setCenter] = useState<google.maps.LatLngLiteral>();
-
     const [options, setOptions] = useState<MapOptions>({
         zoom: 12,
         center: {
@@ -21,37 +21,150 @@ export default function App() {
     });
 
     const [itinerary, setItinerary] = useState<Itinerary>({} as Itinerary);
+    // const [invalid_point, setInvalidPoint] = useState<boolean>(false);
 
-    // const useEffect(()=>{}, [clicks])
+    const [DirectionsService, setDirectionsService] =
+        useState<google.maps.DirectionsService>();
+    // new google.maps.DirectionsService() || undefined
+    const [DirectionsRenderer, setDirectionsRenderer] =
+        useState<google.maps.DirectionsRenderer>();
+    // new google.maps.DirectionsRenderer() || undefined
 
     const onClick = (e: google.maps.MapMouseEvent) => {
-        // avoid directly mutating state
+        console.log(e.latLng);
+        const defaultOptions = {
+            travelMode: google.maps.TravelMode.DRIVING,
+            optimizeWaypoints: false,
+            provideRouteAlternatives: false,
+            // trafficModel:
+        };
 
-        // setClicks([...clicks, e.latLng!]);
+        // SE SERVIÇO E RENDERER DA API DIRECTIONS FORAM CARREGADA
+        if (DirectionsService && DirectionsRenderer) {
+            // SE NÃO POSSUI NENHUM PONTO DEFINIDO
+            if (
+                !itinerary.origin &&
+                !itinerary.destination &&
+                !itinerary.waypoints
+            ) {
+                // DEFINE A ORIGEM
+                setItinerary({ origin: e.latLng! });
+            }
 
-        if (!itinerary.origin) {
-            setItinerary({ ...itinerary, origin: e.latLng! });
-            return;
+            // SE POSSUI APENAS A ORIGEM DEFINIDA
+            if (
+                itinerary.origin &&
+                !itinerary.destination &&
+                !itinerary.waypoints
+            ) {
+                // MONTA REQUEST COM A ORIGEM PREDEFINIDA E O NOVO DESTINO
+                const request: google.maps.DirectionsRequest = {
+                    origin: itinerary.origin,
+                    destination: e.latLng!,
+                    ...defaultOptions,
+                };
+
+                DirectionsService.route(request, (result, status) => {
+                    console.log('result', result);
+                    console.log('status', status);
+
+                    if (status === 'OK') {
+                        // RENDERIZA A ROTA
+                        DirectionsRenderer.setDirections(result);
+                        // DEFINE O DESTINO
+                        setItinerary({
+                            origin: itinerary.origin,
+                            destination: e.latLng!,
+                        });
+                    }
+                    // SE NÃO HOUVER RESULTADOS
+                    else if (status === 'ZERO_RESULTS') {
+                        toast('Sem rotas disponíveis...');
+                    }
+                });
+            }
+
+            // SE POSSUI ORIGEM E DESTINO DEFINIDOS
+            if (
+                itinerary.origin &&
+                itinerary.destination &&
+                !itinerary.waypoints
+            ) {
+                // MONTA REQUEST
+                // ORIGEM PREDEFINIDA,
+                // NOVO DESTINO
+                // TRANSFORMA DESTINO ANTERIOR EM PARADA
+                const request: google.maps.DirectionsRequest = {
+                    origin: itinerary.origin,
+                    destination: e.latLng!,
+                    waypoints: [{ location: itinerary.destination }],
+                    ...defaultOptions,
+                };
+
+                DirectionsService.route(request, (result, status) => {
+                    console.log('result', result);
+                    console.log('status', status);
+
+                    if (status === 'OK') {
+                        // RENDERIZA ROTA
+                        DirectionsRenderer.setDirections(result);
+                        // TRANSFORMA DESTINO EM PARADA, E DEFINE NOVO DESTINO
+                        setItinerary({
+                            origin: itinerary.origin,
+                            destination: e.latLng!,
+                            waypoints: [{ location: itinerary.destination }],
+                        });
+                        // SE NÃO HOUVER RESULTADOS
+                    } else if (status === 'ZERO_RESULTS') {
+                        toast('Sem rotas disponíveis...');
+                    }
+                });
+            }
+
+            // SE POSSUI ORIGEM, DESTINO E PARADAS DEFINIDOS
+            if (
+                itinerary.origin &&
+                itinerary.destination &&
+                itinerary.waypoints
+            ) {
+                // MONTA REQUEST
+                // ORIGEM PREDEFINIDA
+                // NOVO DESTINO
+                // TRANSFORMA DESTINO ANTERIOR EM NOVA PARADA
+                const request: google.maps.DirectionsRequest = {
+                    origin: itinerary.origin,
+                    destination: e.latLng!,
+                    waypoints: [
+                        ...(itinerary.waypoints || []),
+                        { location: itinerary.destination },
+                    ],
+                    ...defaultOptions,
+                };
+
+                DirectionsService.route(request, (result, status) => {
+                    console.log('result', result);
+                    console.log('status', status);
+
+                    if (status === 'OK') {
+                        // RENDERIZA A ROTA
+                        DirectionsRenderer.setDirections(result);
+                        // DEFINE NOVO DESTINO E TRANSFORMA DESTINO EM NOVA PARADA
+                        setItinerary({
+                            origin: itinerary.origin,
+                            destination: e.latLng!,
+                            waypoints: [
+                                ...(itinerary.waypoints || []),
+                                { location: itinerary.destination },
+                            ],
+                        });
+                        // SE NÃO HOUVER RESULTADOS
+                    } else if (status === 'ZERO_RESULTS') {
+                        toast('Sem rotas disponíveis...');
+                    }
+                });
+            }
         }
-
-        if (itinerary.origin && !itinerary.destination) {
-            setItinerary({ ...itinerary, destination: e.latLng! });
-            return;
-        }
-
-        if (itinerary.origin && itinerary.destination) {
-            const newItinerary = { ...itinerary };
-            const newWaypoints = newItinerary.waypoints || [];
-            setItinerary({
-                ...itinerary,
-                destination: e.latLng!,
-                waypoints: [
-                    ...newWaypoints,
-                    { location: itinerary.destination, stopover: true },
-                ],
-            });
-            return;
-        }
+        return;
     };
 
     const onIdle = (m: google.maps.Map) => {
@@ -60,8 +173,13 @@ export default function App() {
         // setCenter(m.getCenter()!.toJSON());
     };
 
+    const render = (status: Status) => {
+        return <h1>{status}</h1>;
+    };
+
     return (
         <div className="h-screen">
+            <ToastContainer />
             <Wrapper
                 apiKey={'AIzaSyCB-ooZaneGDgT8y3WSfQchHMfdN5MSIAE'}
                 render={render}
@@ -72,13 +190,16 @@ export default function App() {
                     className="h-screen"
                     onClick={onClick}
                     onIdle={onIdle}
-                    itinerary={itinerary}
+                    DirectionsService={DirectionsService}
+                    DirectionsRenderer={DirectionsRenderer}
+                    setDirectionsService={setDirectionsService}
+                    setDirectionsRenderer={setDirectionsRenderer}
                 >
                     {/* {clicks.map((click, i) => {
                         return <Marker position={click} key={i} />;
                     })} */}
                     {itinerary.origin && !itinerary.destination && (
-                        <Marker position={itinerary.origin} />
+                        <Marker position={itinerary.origin} draggable={true} />
                     )}
                     ;
                 </Map>

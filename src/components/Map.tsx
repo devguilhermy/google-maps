@@ -1,17 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useEffect } from 'react';
 import useDeepCompareEffect from 'use-deep-compare-effect';
-import {
-	ReactNode,
-	useEffect,
-	useRef,
-	useState
-	} from 'react';
-
-export interface Itinerary {
-    origin?: google.maps.LatLng;
-    destination?: google.maps.LatLng;
-    waypoints?: google.maps.DirectionsWaypoint[];
-}
+import { ReactNode, useRef, useState } from 'react';
+// import { toast } from 'react-toastify';
+// import 'react-toastify/dist/ReactToastify.css';
 
 export interface MapOptions {
     center: google.maps.LatLngLiteral;
@@ -22,10 +13,13 @@ interface MapProps {
     className: string;
     options: MapOptions;
     setOptions?: (options: MapOptions) => void;
-    onClick?: (e: google.maps.MapMouseEvent) => void;
-    onIdle?: (map: google.maps.Map) => void;
+    onClick: (e: google.maps.MapMouseEvent) => void;
+    onIdle: (map: google.maps.Map) => void;
     children?: ReactNode;
-    itinerary: Itinerary;
+    DirectionsService: google.maps.DirectionsService | undefined;
+    DirectionsRenderer: google.maps.DirectionsRenderer | undefined;
+    setDirectionsService: (directions: google.maps.DirectionsService) => void;
+    setDirectionsRenderer: (directions: google.maps.DirectionsRenderer) => void;
 }
 
 export function Map({
@@ -35,81 +29,37 @@ export function Map({
     onClick,
     onIdle,
     children,
-    itinerary,
+    DirectionsRenderer,
+    setDirectionsService,
+    setDirectionsRenderer,
 }: MapProps) {
     const ref = useRef<HTMLDivElement>(null);
     const [map, setMap] = useState<google.maps.Map>();
 
-    const memoizedDirectionsService = useMemo(() => {
-        return new google.maps.DirectionsService();
-    }, []);
-
-    const memoizedDirectionsRenderer = useMemo(() => {
-        return new google.maps.DirectionsRenderer();
-    }, []);
-
-    useEffect(() => {
-        if (ref.current && !map) {
-            setMap(new window.google.maps.Map(ref.current, options));
-        }
-    }, [ref, map, options]);
-
     useDeepCompareEffect(() => {
         if (map) {
             map.setOptions(options);
+            setDirectionsService(new google.maps.DirectionsService());
+            setDirectionsRenderer(new google.maps.DirectionsRenderer());
         }
     }, [map, options]);
 
     useEffect(() => {
+        if (ref.current && !map) {
+            setMap(new google.maps.Map(ref.current, options));
+        }
         if (map) {
-            memoizedDirectionsRenderer.setMap(map);
+            DirectionsRenderer && DirectionsRenderer.setMap(map);
 
             ['click', 'idle'].forEach((eventName) =>
                 google.maps.event.clearListeners(map, eventName)
             );
 
-            if (onClick) {
-                map.addListener('click', onClick);
-            }
+            map.addListener('click', onClick);
 
-            if (onIdle) {
-                map.addListener('idle', () => onIdle(map));
-            }
-
-            // map.addListener(
-            //     'center_changed',
-            //     (e: google.maps.LatLngLiteral) => {
-            //         console.log(e);
-            //         setOptions &&
-            //             setOptions({
-            //                 ...options,
-            //                 center: { lat: e.lat, lng: e.lng },
-            //             });
-            //     }
-            // );
+            onIdle && map.addListener('idle', () => onIdle(map));
         }
-    }, [map, onClick, onIdle, options, setOptions, memoizedDirectionsRenderer]);
-
-    useEffect(() => {
-        if (itinerary.origin && itinerary.destination) {
-            const request: google.maps.DirectionsRequest = {
-                origin: itinerary.origin,
-                destination: itinerary.destination,
-                travelMode: google.maps.TravelMode.DRIVING,
-                waypoints: itinerary.waypoints,
-                optimizeWaypoints: false,
-                provideRouteAlternatives: false,
-            };
-
-            console.log('request', request);
-
-            memoizedDirectionsService.route(request, function (result, status) {
-                if (status === 'OK') {
-                    memoizedDirectionsRenderer.setDirections(result);
-                }
-            });
-        }
-    }, [itinerary, memoizedDirectionsService, memoizedDirectionsRenderer]);
+    }, [ref, map, onClick, onIdle, options, setOptions, DirectionsRenderer]);
 
     return (
         <>
