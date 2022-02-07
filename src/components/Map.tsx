@@ -20,6 +20,10 @@ interface MapProps {
     DirectionsRenderer: google.maps.DirectionsRenderer | undefined;
     setDirectionsService: (directions: google.maps.DirectionsService) => void;
     setDirectionsRenderer: (directions: google.maps.DirectionsRenderer) => void;
+    map: google.maps.Map;
+    setMap: (map: google.maps.Map) => void;
+    geocoder: google.maps.Geocoder;
+    setGeocoder: (geocoder: google.maps.Geocoder) => void;
 }
 
 export function Map({
@@ -32,9 +36,12 @@ export function Map({
     DirectionsRenderer,
     setDirectionsService,
     setDirectionsRenderer,
+    map,
+    setMap,
+    geocoder,
+    setGeocoder,
 }: MapProps) {
     const ref = useRef<HTMLDivElement>(null);
-    const [map, setMap] = useState<google.maps.Map>();
 
     useDeepCompareEffect(() => {
         if (map) {
@@ -45,8 +52,9 @@ export function Map({
     }, [map, options]);
 
     useEffect(() => {
-        if (ref.current && !map) {
+        if (ref.current && !map && !map && !geocoder) {
             setMap(new google.maps.Map(ref.current, options));
+            setGeocoder(new google.maps.Geocoder());
         }
         if (map) {
             DirectionsRenderer && DirectionsRenderer.setMap(map);
@@ -59,7 +67,18 @@ export function Map({
 
             onIdle && map.addListener('idle', () => onIdle(map));
         }
-    }, [ref, map, onClick, onIdle, options, setOptions, DirectionsRenderer]);
+    }, [
+        ref,
+        map,
+        setMap,
+        onClick,
+        onIdle,
+        options,
+        setOptions,
+        DirectionsRenderer,
+        geocoder,
+        setGeocoder,
+    ]);
 
     return (
         <>
