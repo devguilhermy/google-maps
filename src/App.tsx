@@ -1,15 +1,14 @@
-import { Icons, toast, ToastContainer } from 'react-toastify';
-import { LegacyRef, useRef, useState } from 'react';
 import { Map, MapOptions } from './components/Map';
 import { Marker } from './components/Marker';
 import { Status, Wrapper } from '@googlemaps/react-wrapper';
+import { toast, ToastContainer } from 'react-toastify';
+import { useState } from 'react';
 import 'react-toastify/dist/ReactToastify.css';
 
 export interface Itinerary {
     origin?: { location: google.maps.LatLng; address: string };
     destination?: { location: google.maps.LatLng; address: string };
     waypoints?: {
-        // id: string;
         location: google.maps.DirectionsWaypoint;
         address: string;
     }[];
@@ -69,7 +68,6 @@ export default function App() {
         mode: 'input' | 'map_click';
     }
 
-    // FUNÇÃO PRA COMANDAR A EDIÇÃO DE ITINERÁRIO
     // VERIFICA OS VALORES PRESENTES NO ITINERÁRIO PRA SABER QUAIS CAMPOS ALTERAR
     // RESPONSÁVEL PELOS SERVIÇOS DE DIREÇÃO E LOCAL
     function handleItineraryChange({
@@ -804,14 +802,7 @@ export default function App() {
                     value={input_origin}
                     onChange={(e) => setInputOrigin(e.target.value)}
                     onFocus={() => setActiveInput('origin')}
-                    // ref={addressRef as LegacyRef<HTMLInputElement>}
                 />
-                {/* <input
-                    type="text"
-                    className="px-3 py-2 bg-gray-100 rounded-xl"
-                    placeholder="Paradas"
-                    // ref={addressRef as LegacyRef<HTMLInputElement>}
-                /> */}
                 <input
                     type="text"
                     className="px-3 py-2 bg-gray-100 rounded-xl"
@@ -821,8 +812,6 @@ export default function App() {
                     onChange={(e) => setInputDestination(e.target.value)}
                     onFocus={() => setActiveInput('destination')}
                 />
-                {/* {inputs_waypoints.map((waypoint) => {
-                    return ( */}
                 <input
                     type="text"
                     className="px-3 py-2 bg-gray-100 rounded-xl"
@@ -831,18 +820,13 @@ export default function App() {
                     onChange={(e) => setInputWaypoint(e.target.value)}
                     onFocus={() => setActiveInput('waypoint')}
                 />
-                {/* );
-                })} */}
                 <button
-                    // type="submit"
                     className="px-3 py-2 bg-gray-300 rounded-xl"
                     onClick={newWaypoint}
                 >
-                    {/* <FaPlus /> */}
                     Nova parada
                 </button>
                 <button
-                    // type="submit"
                     className="px-3 py-2 bg-blue-500 rounded-xl"
                     onClick={findAddress}
                 >
@@ -870,9 +854,6 @@ export default function App() {
                         setGeocoder={setGeocoder}
                         geocoder={geocoder as google.maps.Geocoder}
                     >
-                        {/* {clicks.map((click, i) => {
-                        return <Marker position={click} key={i} />;
-                    })} */}
                         {itinerary.origin && !itinerary.destination && (
                             <Marker
                                 position={itinerary.origin.location}
