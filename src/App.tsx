@@ -38,153 +38,12 @@ export default function App() {
     const [geocoder, setGeocoder] = useState<google.maps.Geocoder>();
 
     const onClick = (e: google.maps.MapMouseEvent) => {
-        console.log(e.latLng);
-        // const defaultOptions = {
-        //     travelMode: google.maps.TravelMode.DRIVING,
-        //     optimizeWaypoints: false,
-        //     provideRouteAlternatives: false,
-        //     // trafficModel:
-        // };
+        // console.log(e.latLng);
 
         handleItineraryChange({
             newLocation: { location: e.latLng!, address: '' },
-            input: active_input,
             mode: 'map_click',
         });
-
-        // SE SERVIÇO E RENDERER DA API DIRECTIONS FORAM CARREGADA
-        // if (DirectionsService && DirectionsRenderer) {
-
-        //     // SE NÃO POSSUI NENHUM PONTO DEFINIDO
-        //     if (
-        //         !itinerary.origin &&
-        //         !itinerary.destination &&
-        //         !itinerary.waypoints
-        //     ) {
-        //         // DEFINE A ORIGEM
-        //         // setItinerary({ origin: { location: e.latLng! } });
-
-        // 		handleItineraryChange({location: e.latLng!, address: ""})
-        //     }
-
-        //     // SE POSSUI APENAS A ORIGEM DEFINIDA
-        //     if (
-        //         itinerary.origin &&
-        //         !itinerary.destination &&
-        //         !itinerary.waypoints
-        //     ) {
-        // 		handleItineraryChange({location: e.latLng!, address: ""})
-
-        //         // // MONTA REQUEST COM A ORIGEM PREDEFINIDA E O NOVO DESTINO
-        //         // const request: google.maps.DirectionsRequest = {
-        //         //     origin: itinerary.origin,
-        //         //     destination: e.latLng!,
-        //         //     ...defaultOptions,
-        //         // };
-
-        //         // DirectionsService.route(request, (result, status) => {
-        //         //     console.log('result', result);
-        //         //     console.log('status', status);
-
-        //         //     if (status === 'OK') {
-        //         //         // RENDERIZA A ROTA
-        //         //         DirectionsRenderer.setDirections(result);
-        //         //         // DEFINE O DESTINO
-        //         //         setItinerary({
-        //         //             origin: itinerary.origin,
-        //         //             destination: e.latLng!,
-        //         //         });
-        //         //     }
-        //         //     // SE NÃO HOUVER RESULTADOS
-        //         //     else if (status === 'ZERO_RESULTS') {
-        //         //         toast('Sem rotas disponíveis...');
-        //         //     }
-        //         // });
-        //     }
-
-        //     // SE POSSUI ORIGEM E DESTINO DEFINIDOS
-        //     if (
-        //         itinerary.origin &&
-        //         itinerary.destination &&
-        //         !itinerary.waypoints
-        //     ) {
-        // 		handleItineraryChange({location: e.latLng!, address: ""})
-
-        //         // MONTA REQUEST
-        //         // ORIGEM PREDEFINIDA,
-        //         // NOVO DESTINO
-        //         // TRANSFORMA DESTINO ANTERIOR EM PARADA
-        //         // const request: google.maps.DirectionsRequest = {
-        //         //     origin: itinerary.origin,
-        //         //     destination: e.latLng!,
-        //         //     waypoints: [{ location: itinerary.destination }],
-        //         //     ...defaultOptions,
-        //         // };
-
-        //         // DirectionsService.route(request, (result, status) => {
-        //         //     console.log('result', result);
-        //         //     console.log('status', status);
-
-        //         //     if (status === 'OK') {
-        //         //         // RENDERIZA ROTA
-        //         //         DirectionsRenderer.setDirections(result);
-        //         //         // TRANSFORMA DESTINO EM PARADA, E DEFINE NOVO DESTINO
-        //         //         setItinerary({
-        //         //             origin: itinerary.origin,
-        //         //             destination: e.latLng!,
-        //         //             waypoints: [{ location: itinerary.destination }],
-        //         //         });
-        //         //         // SE NÃO HOUVER RESULTADOS
-        //         //     } else if (status === 'ZERO_RESULTS') {
-        //         //         toast('Sem rotas disponíveis...');
-        //         //     }
-        //         // });
-        //     }
-
-        //     // SE POSSUI ORIGEM, DESTINO E PARADAS DEFINIDOS
-        //     if (
-        //         itinerary.origin &&
-        //         itinerary.destination &&
-        //         itinerary.waypoints
-        //     ) {
-        //         // MONTA REQUEST
-        //         // ORIGEM PREDEFINIDA
-        //         // NOVO DESTINO
-        //         // TRANSFORMA DESTINO ANTERIOR EM NOVA PARADA
-        //         const request: google.maps.DirectionsRequest = {
-        //             origin: itinerary.origin,
-        //             destination: e.latLng!,
-        //             waypoints: [
-        //                 ...(itinerary.waypoints || []),
-        //                 { location: itinerary.destination },
-        //             ],
-        //             ...defaultOptions,
-        //         };
-
-        //         DirectionsService.route(request, (result, status) => {
-        //             console.log('result', result);
-        //             console.log('status', status);
-
-        //             if (status === 'OK') {
-        //                 // RENDERIZA A ROTA
-        //                 DirectionsRenderer.setDirections(result);
-        //                 // DEFINE NOVO DESTINO E TRANSFORMA DESTINO EM NOVA PARADA
-        //                 setItinerary({
-        //                     origin: itinerary.origin,
-        //                     destination: e.latLng!,
-        //                     waypoints: [
-        //                         ...(itinerary.waypoints || []),
-        //                         { location: itinerary.destination },
-        //                     ],
-        //                 });
-        //                 // SE NÃO HOUVER RESULTADOS
-        //             } else if (status === 'ZERO_RESULTS') {
-        //                 toast('Sem rotas disponíveis...');
-        //             }
-        //         });
-        //     }
-        // }
-        return;
     };
 
     const [active_input, setActiveInput] = useState<'origin' | 'destination'>(
@@ -203,10 +62,9 @@ export default function App() {
 
     interface HandleItineraryChangeProps {
         newLocation: {
-            location: google.maps.LatLng;
-            address: string;
+            location?: google.maps.LatLng;
+            address?: string;
         };
-        input: 'origin' | 'destination' | 'waypoint';
         mode: 'input' | 'map_click';
     }
 
@@ -215,7 +73,6 @@ export default function App() {
     // RESPONSÁVEL PELOS SERVIÇOS DE DIREÇÃO E LOCAL
     function handleItineraryChange({
         newLocation,
-        input,
         mode,
     }: HandleItineraryChangeProps) {
         const defaultOptions = {
@@ -225,281 +82,464 @@ export default function App() {
             // trafficModel:
         };
 
-        // CLIQUE COM CAMPO ORIGEM
-        if (input === 'origin' && mode === 'map_click') {
-            geocoder &&
-                // GEOCODER RETORNA NOME DO ENDEREÇO
-                geocoder.geocode(
-                    { location: newLocation.location },
-                    (results, status) => {
-                        if (status === 'OK' && results && map) {
-                            // setItinerary({origin: results.})
+        // CASO TENHA CLICADO NO MAPA
+        if (mode === 'map_click') {
+            // CLIQUE COM CAMPO ORIGEM
+            if (active_input === 'origin') {
+                geocoder &&
+                    // GEOCODER BUSCA NOME DO LOCAL CLICADO
+                    geocoder.geocode(
+                        { location: newLocation.location },
+                        (results, status) => {
+                            // SE LOCAL EXISTIR
+                            if (status === 'OK' && results && map) {
+                                // DEIXA O CAMPO DE DESTINO ATIVO
+                                setActiveInput('destination');
 
-                            console.log('GEOCODING --------');
-                            console.log('results', results);
-                            console.log('status', status);
+                                console.log('GEOCODING --------');
+                                console.log('results', results);
+                                console.log('status', status);
 
-                            if (itinerary.destination) {
-                                const request: google.maps.DirectionsRequest = {
-                                    origin: results[0].geometry.location || '',
-                                    destination: itinerary.destination.location,
-                                    ...defaultOptions,
-                                };
+                                const geocoding = results[0];
 
-                                if (DirectionsService && DirectionsRenderer)
-                                    DirectionsService.route(
-                                        request,
-                                        (result, status) => {
-                                            console.log('DIRECTIONS ------');
-                                            console.log('result', result);
-                                            console.log('status', status);
+                                // SE NÃO HOUVER DESTINO DEFINIDO
+                                if (!itinerary.destination) {
+                                    // CENTRALIZA O MAPA NO LOCAL CLICADO
+                                    map.setCenter(geocoding.geometry.location);
 
-                                            if (status === 'OK') {
-                                                // RENDERIZA A ROTA
-                                                DirectionsRenderer.setDirections(
-                                                    result
+                                    // INSERE ENDEREÇO NO CAMPO DE ORIGEM
+                                    setInputOrigin(geocoding.formatted_address);
+
+                                    // ATUALIZA ORIGEM NO ITINERÁRIO
+                                    setItinerary({
+                                        ...itinerary,
+                                        origin: {
+                                            location:
+                                                geocoding.geometry.location,
+                                            address:
+                                                geocoding.formatted_address,
+                                        },
+                                    });
+                                }
+                                // SE HOUVER DESTINO DEFINIDO
+                                else {
+                                    // MONTA REQUISIÇÃO DE DIREÇÕES
+                                    const request: google.maps.DirectionsRequest =
+                                        {
+                                            origin:
+                                                geocoding.geometry.location ||
+                                                '',
+                                            destination:
+                                                itinerary.destination.location,
+                                            ...defaultOptions,
+                                        };
+
+                                    // SE SERVIÇOS DE DIREÇÃO ESTIVEREM CARREGADOS
+                                    if (DirectionsService && DirectionsRenderer)
+                                        // FAZ REQUISIÇÃO
+                                        DirectionsService.route(
+                                            request,
+                                            (result, status) => {
+                                                console.log(
+                                                    'DIRECTIONS ------'
                                                 );
+                                                console.log('result', result);
+                                                console.log('status', status);
 
-                                                map.setCenter(
-                                                    results[0].geometry.location
-                                                );
+                                                const route = results[0];
 
-                                                setInputOrigin(
-                                                    results[0].formatted_address
-                                                );
-                                                setItinerary({
-                                                    ...itinerary,
-                                                    origin: {
-                                                        location:
-                                                            results[0].geometry
-                                                                .location,
-                                                        address:
-                                                            results[0]
-                                                                .formatted_address,
-                                                    },
-                                                });
-                                            }
-                                            // SE NÃO HOUVER RESULTADOS
-                                            else if (
-                                                status === 'ZERO_RESULTS'
-                                            ) {
-                                                toast(
-                                                    'Sem rotas disponíveis...'
-                                                );
-                                            }
-                                        }
-                                    );
-                            } else {
-                                map.setCenter(results[0].geometry.location);
-                                setInputOrigin(results[0].formatted_address);
-                                setItinerary({
-                                    ...itinerary,
-                                    origin: {
-                                        location: results[0].geometry.location,
-                                        address: results[0].formatted_address,
-                                    },
-                                });
-                            }
+                                                // SE HOUVER ROTAS
+                                                if (status === 'OK') {
+                                                    // RENDERIZA A ROTA
+                                                    DirectionsRenderer.setDirections(
+                                                        result
+                                                    );
 
-                            // new google.maps.Marker({
-                            //     map: map,
-                            //     position: results[0].geometry.location,
-                            // });
-                        } else {
-                            alert(
-                                'Geocode was not successful for the following reason: ' +
-                                    status
-                            );
-                        }
-                    }
-                );
-        } else if (input === 'destination' && mode === 'map_click') {
-            geocoder &&
-                geocoder.geocode(
-                    { location: newLocation.location },
-                    (results, status) => {
-                        if (status === 'OK' && results && map) {
-                            console.log(results);
+                                                    // CENTRALIZA O MAPA NA ROTA
+                                                    map.setCenter(
+                                                        route.geometry.location
+                                                    );
 
-                            const request: google.maps.DirectionsRequest = {
-                                origin: itinerary.origin?.location || '',
-                                destination: results[0].geometry.location,
-                                ...defaultOptions,
-                            };
-
-                            if (DirectionsService && DirectionsRenderer)
-                                DirectionsService.route(
-                                    request,
-                                    (result, status) => {
-                                        console.log('DIRECTIONS ------');
-                                        console.log('result', result);
-                                        console.log('status', status);
-
-                                        if (status === 'OK') {
-                                            // RENDERIZA A ROTA
-                                            DirectionsRenderer.setDirections(
-                                                result
-                                            );
-
-                                            map.setCenter(
-                                                results[0].geometry.location
-                                            );
-                                            setInputDestination(
-                                                results[0].formatted_address
-                                            );
-                                            setItinerary({
-                                                ...itinerary,
-                                                destination: {
-                                                    location:
-                                                        results[0].geometry
-                                                            .location,
-                                                    address:
+                                                    // INSERE ENDEREÇO NO CAMPO DE ORIGEM
+                                                    setInputOrigin(
                                                         results[0]
-                                                            .formatted_address,
-                                                },
-                                            });
-                                        }
-                                        // SE NÃO HOUVER RESULTADOS
-                                        else if (status === 'ZERO_RESULTS') {
-                                            toast('Sem rotas disponíveis...');
-                                        }
-                                    }
+                                                            .formatted_address
+                                                    );
+
+                                                    // ATUALIZA A ORIGEM NO ITINERÁRIO
+                                                    setItinerary({
+                                                        ...itinerary,
+                                                        origin: {
+                                                            location:
+                                                                geocoding
+                                                                    .geometry
+                                                                    .location,
+                                                            address:
+                                                                geocoding.formatted_address,
+                                                        },
+                                                    });
+                                                }
+                                                // SE NÃO HOUVER ROTAS
+                                                else if (
+                                                    status === 'ZERO_RESULTS'
+                                                ) {
+                                                    toast(
+                                                        'Sem rotas disponíveis...'
+                                                    );
+                                                }
+                                            }
+                                        );
+                                }
+
+                                // new google.maps.Marker({
+                                //     map: map,
+                                //     position: results[0].geometry.location,
+                                // });
+                            } else {
+                                alert(
+                                    'Geocode was not successful for the following reason: ' +
+                                        status
                                 );
-                        } else {
-                            alert(
-                                'Geocode was not successful for the following reason: ' +
-                                    status
-                            );
+                            }
                         }
-                    }
-                );
+                    );
+            } else if (active_input === 'destination') {
+                geocoder &&
+                    // BUSCA NOME DO LOCAL CLICADO
+                    geocoder.geocode(
+                        { location: newLocation.location },
+                        (results, status) => {
+                            // SE LOCAL EXISTIR
+                            if (status === 'OK' && results && map) {
+                                // DEIXA O CAMPO DE ORIGEM ATIVO
+                                setActiveInput('origin');
+                                console.log('GEOCODING --------');
+                                console.log('results', results);
+                                console.log('status', status);
+
+                                const geocoding = results[0];
+
+                                if (!itinerary.origin) {
+                                    // CENTRALIZA O MAPA NO LOCAL CLICADO
+                                    map.setCenter(geocoding.geometry.location);
+
+                                    // INSERE ENDEREÇO NO CAMPO DE ORIGEM
+                                    setInputDestination(
+                                        geocoding.formatted_address
+                                    );
+
+                                    // ATUALIZA ORIGEM NO ITINERÁRIO
+                                    setItinerary({
+                                        ...itinerary,
+                                        destination: {
+                                            location:
+                                                geocoding.geometry.location,
+                                            address:
+                                                geocoding.formatted_address,
+                                        },
+                                    });
+                                } else {
+                                    const request: google.maps.DirectionsRequest =
+                                        {
+                                            origin: itinerary.origin.location,
+                                            destination:
+                                                geocoding.geometry.location,
+                                            ...defaultOptions,
+                                        };
+
+                                    // SE SERVIÇOS DE DIREÇÃO ESTIVEREM CARREGADOS
+                                    if (DirectionsService && DirectionsRenderer)
+                                        // BUSCA DIREÇÕES
+                                        DirectionsService.route(
+                                            request,
+                                            (result, status) => {
+                                                console.log(
+                                                    'DIRECTIONS ------'
+                                                );
+                                                console.log('result', result);
+                                                console.log('status', status);
+
+                                                if (status === 'OK') {
+                                                    // RENDERIZA A ROTA
+                                                    DirectionsRenderer.setDirections(
+                                                        result
+                                                    );
+
+                                                    map.setCenter(
+                                                        geocoding.geometry
+                                                            .location
+                                                    );
+                                                    setInputDestination(
+                                                        geocoding.formatted_address
+                                                    );
+                                                    setItinerary({
+                                                        ...itinerary,
+                                                        destination: {
+                                                            location:
+                                                                geocoding
+                                                                    .geometry
+                                                                    .location,
+                                                            address:
+                                                                geocoding.formatted_address,
+                                                        },
+                                                    });
+                                                }
+                                                // SE NÃO HOUVER RESULTADOS
+                                                else if (
+                                                    status === 'ZERO_RESULTS'
+                                                ) {
+                                                    toast(
+                                                        'Sem rotas disponíveis...'
+                                                    );
+                                                }
+                                            }
+                                        );
+                                }
+                            } else {
+                                alert(
+                                    'Geocode was not successful for the following reason: ' +
+                                        status
+                                );
+                            }
+                        }
+                    );
+            }
+            // BUSCA DE LOCAL POR ENDEREÇO
+        } else if (mode === 'input') {
+            if (active_input === 'origin') {
+                geocoder &&
+                    // GEOCODER BUSCA NOME DO LOCAL CLICADO
+                    geocoder.geocode(
+                        { address: newLocation.address },
+                        (results, status) => {
+                            // SE LOCAL EXISTIR
+                            if (status === 'OK' && results && map) {
+                                // DEIXA O CAMPO DE DESTINO ATIVO
+                                setActiveInput('destination');
+
+                                console.log('GEOCODING --------');
+                                console.log('results', results);
+                                console.log('status', status);
+
+                                const geocoding = results[0];
+
+                                // SE NÃO HOUVER DESTINO DEFINIDO
+                                if (!itinerary.destination) {
+                                    // CENTRALIZA O MAPA NO LOCAL DIGITADO
+                                    map.setCenter(geocoding.geometry.location);
+
+                                    // INSERE ENDEREÇO NO CAMPO DE ORIGEM
+                                    setInputOrigin(geocoding.formatted_address);
+
+                                    // ATUALIZA ORIGEM NO ITINERÁRIO
+                                    setItinerary({
+                                        ...itinerary,
+                                        origin: {
+                                            location:
+                                                geocoding.geometry.location,
+                                            address:
+                                                geocoding.formatted_address,
+                                        },
+                                    });
+                                }
+                                // SE HOUVER DESTINO DEFINIDO
+                                else {
+                                    // MONTA REQUISIÇÃO DE DIREÇÕES
+                                    const request: google.maps.DirectionsRequest =
+                                        {
+                                            origin:
+                                                geocoding.geometry.location ||
+                                                '',
+                                            destination:
+                                                itinerary.destination.location,
+                                            ...defaultOptions,
+                                        };
+
+                                    // SE SERVIÇOS DE DIREÇÃO ESTIVEREM CARREGADOS
+                                    if (DirectionsService && DirectionsRenderer)
+                                        // FAZ REQUISIÇÃO
+                                        DirectionsService.route(
+                                            request,
+                                            (result, status) => {
+                                                console.log(
+                                                    'DIRECTIONS ------'
+                                                );
+                                                console.log('result', result);
+                                                console.log('status', status);
+
+                                                const route = results[0];
+
+                                                // SE HOUVER ROTAS
+                                                if (status === 'OK') {
+                                                    // RENDERIZA A ROTA
+                                                    DirectionsRenderer.setDirections(
+                                                        result
+                                                    );
+
+                                                    // CENTRALIZA O MAPA NA ROTA
+                                                    map.setCenter(
+                                                        route.geometry.location
+                                                    );
+
+                                                    // INSERE ENDEREÇO NO CAMPO DE ORIGEM
+                                                    setInputOrigin(
+                                                        results[0]
+                                                            .formatted_address
+                                                    );
+
+                                                    // ATUALIZA A ORIGEM NO ITINERÁRIO
+                                                    setItinerary({
+                                                        ...itinerary,
+                                                        origin: {
+                                                            location:
+                                                                geocoding
+                                                                    .geometry
+                                                                    .location,
+                                                            address:
+                                                                geocoding.formatted_address,
+                                                        },
+                                                    });
+                                                }
+                                                // SE NÃO HOUVER ROTAS
+                                                else if (
+                                                    status === 'ZERO_RESULTS'
+                                                ) {
+                                                    toast(
+                                                        'Sem rotas disponíveis...'
+                                                    );
+                                                }
+                                            }
+                                        );
+                                }
+
+                                // new google.maps.Marker({
+                                //     map: map,
+                                //     position: results[0].geometry.location,
+                                // });
+                            } else {
+                                alert(
+                                    'Geocode was not successful for the following reason: ' +
+                                        status
+                                );
+                            }
+                        }
+                    );
+            } else if (active_input === 'destination') {
+                geocoder &&
+                    // BUSCA NOME DO LOCAL CLICADO
+                    geocoder.geocode(
+                        { address: newLocation.address },
+                        (results, status) => {
+                            // SE LOCAL EXISTIR
+                            if (status === 'OK' && results && map) {
+                                // DEIXA O CAMPO DE ORIGEM ATIVO
+                                setActiveInput('origin');
+                                console.log('GEOCODING --------');
+                                console.log('results', results);
+                                console.log('status', status);
+
+                                const geocoding = results[0];
+
+                                if (!itinerary.origin) {
+                                    // CENTRALIZA O MAPA NO LOCAL CLICADO
+                                    map.setCenter(geocoding.geometry.location);
+
+                                    // INSERE ENDEREÇO NO CAMPO DE ORIGEM
+                                    setInputDestination(
+                                        geocoding.formatted_address
+                                    );
+
+                                    // ATUALIZA ORIGEM NO ITINERÁRIO
+                                    setItinerary({
+                                        ...itinerary,
+                                        destination: {
+                                            location:
+                                                geocoding.geometry.location,
+                                            address:
+                                                geocoding.formatted_address,
+                                        },
+                                    });
+                                } else {
+                                    const request: google.maps.DirectionsRequest =
+                                        {
+                                            origin: itinerary.origin.location,
+                                            destination:
+                                                geocoding.geometry.location,
+                                            ...defaultOptions,
+                                        };
+
+                                    // SE SERVIÇOS DE DIREÇÃO ESTIVEREM CARREGADOS
+                                    if (DirectionsService && DirectionsRenderer)
+                                        // BUSCA DIREÇÕES
+                                        DirectionsService.route(
+                                            request,
+                                            (result, status) => {
+                                                console.log(
+                                                    'DIRECTIONS ------'
+                                                );
+                                                console.log('result', result);
+                                                console.log('status', status);
+
+                                                if (status === 'OK') {
+                                                    // RENDERIZA A ROTA
+                                                    DirectionsRenderer.setDirections(
+                                                        result
+                                                    );
+
+                                                    map.setCenter(
+                                                        geocoding.geometry
+                                                            .location
+                                                    );
+                                                    setInputDestination(
+                                                        geocoding.formatted_address
+                                                    );
+                                                    setItinerary({
+                                                        ...itinerary,
+                                                        destination: {
+                                                            location:
+                                                                geocoding
+                                                                    .geometry
+                                                                    .location,
+                                                            address:
+                                                                geocoding.formatted_address,
+                                                        },
+                                                    });
+                                                }
+                                                // SE NÃO HOUVER RESULTADOS
+                                                else if (
+                                                    status === 'ZERO_RESULTS'
+                                                ) {
+                                                    toast(
+                                                        'Sem rotas disponíveis...'
+                                                    );
+                                                }
+                                            }
+                                        );
+                                }
+                            } else {
+                                alert(
+                                    'Geocode was not successful for the following reason: ' +
+                                        status
+                                );
+                            }
+                        }
+                    );
+            }
         }
-
-        //     if (
-        //         !itinerary.origin &&
-        //         !itinerary.destination &&
-        //         !itinerary.waypoints
-        //     ) {
-
-        //         geocoder &&
-        //             geocoder.geocode({ address: address.address }, (results, status) => {
-        //                 if (status === 'OK' && results && map) {
-        //                     map.setCenter(results[0].geometry.location);
-        //                     // setItinerary({origin: results.})
-
-        //                     console.log(results);
-
-        //                     setInputOrigin(results[0].formatted_address);
-        //                     setItinerary({
-        //                         origin: results[0].geometry.location,
-        //                         origin_address: results[0].formatted_address,
-        //                     });
-
-        //                     new google.maps.Marker({
-        //                         map: map,
-        //                         position: results[0].geometry.location,
-        //                     });
-        //                 } else {
-        //                     alert(
-        //                         'Geocode was not successful for the following reason: ' +
-        //                             status
-        //                     );
-        //                 }
-        //             });
-        //         setItinerary({
-        //             origin: address,
-        //         });
-        //         setInputOrigin(address.address);
-        //     } else if (
-        //         itinerary.origin &&
-        //         !itinerary.destination &&
-        //         !itinerary.waypoints
-        //     ) {
-
-        // 		const request: google.maps.DirectionsRequest = {
-        // 			origin: itinerary.origin?.location || "",
-        // 			destination: address.,
-        // 			...defaultOptions,
-        // 		};
-
-        //         if (DirectionsService && DirectionsRenderer)
-        //             DirectionsService.route(request, (result, status) => {
-        //                 console.log('result', result);
-        //                 console.log('status', status);
-
-        //                 if (status === 'OK') {
-        //                     // RENDERIZA A ROTA
-        //                     DirectionsRenderer.setDirections(result);
-        //                     // DEFINE O DESTINO
-
-        //                     setItinerary({
-        //                         origin: address,
-        //                     });
-        //                     setInputOrigin(address.address);
-        //                 }
-        //                 // SE NÃO HOUVER RESULTADOS
-        //                 else if (status === 'ZERO_RESULTS') {
-        //                     toast('Sem rotas disponíveis...');
-        //                 }
-        //             });
-        //         setItinerary({
-        //             ...itinerary,
-        //             destination: address,
-        //         });
-        //         setInputDestination(address.address);
-        //     } else if (
-        //         itinerary.origin &&
-        //         itinerary.destination &&
-        //         !itinerary.waypoints
-        //     ) {
-        //         // setItinerary({
-        //         // 	...itinerary,
-        //         //     waypoints: [{itinerary.destination}],
-        //         //     destination_address: input_destination,
-        //         // });
-        //     }
     }
 
-    // const addressRef = useRef<HTMLInputElement>();
-
     function findAddress() {
-        // address: string,
-        // input: 'origin' | 'destination' | 'waypoint'
-        // let address = '';
-        // if (input_origin !== '' && input_destination === '') {
-        //     address = input_origin;
-        // } else if (input_origin !== '' && input_destination !== '') {
-        //     address = input_destination;
-        // }
-        // handleItineraryChange({
-        //     newLocation: {
-        //         location: {} as google.maps.LatLng,
-        //         address,
-        //     },
-        //     input,
-        // });
-        // geocoder &&
-        //     geocoder.geocode({ address }, (results, status) => {
-        //         if (status === 'OK' && results && map) {
-        //             map.setCenter(results[0].geometry.location);
-        //             // setItinerary({origin: results.})
-        //             console.log(results);
-        //             setInputOrigin(results[0].formatted_address);
-        //             setItinerary({
-        //                 origin: results[0].geometry.location,
-        //                 origin_address: results[0].formatted_address,
-        //             });
-        //             new google.maps.Marker({
-        //                 map: map,
-        //                 position: results[0].geometry.location,
-        //             });
-        //         } else {
-        //             alert(
-        //                 'Geocode was not successful for the following reason: ' +
-        //                     status
-        //             );
-        //         }
-        //     });
+        if (active_input === 'origin') {
+            handleItineraryChange({
+                newLocation: { address: input_origin },
+                mode: 'input',
+            });
+        } else if (active_input === 'destination') {
+            handleItineraryChange({
+                newLocation: { address: input_destination },
+                mode: 'input',
+            });
+        }
     }
     const [input_origin, setInputOrigin] = useState('');
     const [input_destination, setInputDestination] = useState('');
@@ -514,7 +554,7 @@ export default function App() {
                     placeholder="Origem"
                     id="origin"
                     value={input_origin}
-                    // onChange={(e) => findAddress(e.target.value, 'origin')}
+                    onChange={(e) => setInputOrigin(e.target.value)}
                     onFocus={() => setActiveInput('origin')}
                     // ref={addressRef as LegacyRef<HTMLInputElement>}
                 />
@@ -530,13 +570,13 @@ export default function App() {
                     placeholder="Destino"
                     id="destination"
                     value={input_destination}
-                    // onChange={(e) => findAddress(e.target.value, 'destination')}
+                    onChange={(e) => setInputDestination(e.target.value)}
                     onFocus={() => setActiveInput('destination')}
                 />
                 <button
-                    type="submit"
+                    // type="submit"
                     className="px-3 py-2 bg-blue-500 rounded-xl"
-                    // onClick={getAddresses}
+                    onClick={findAddress}
                 >
                     Pesquisar
                 </button>
@@ -568,6 +608,12 @@ export default function App() {
                         {itinerary.origin && !itinerary.destination && (
                             <Marker
                                 position={itinerary.origin.location}
+                                draggable={true}
+                            />
+                        )}
+                        {!itinerary.origin && itinerary.destination && (
+                            <Marker
+                                position={itinerary.destination.location}
                                 draggable={true}
                             />
                         )}
