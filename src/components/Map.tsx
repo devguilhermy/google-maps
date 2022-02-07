@@ -11,8 +11,8 @@ export interface MapOptions {
 
 interface MapProps {
     className: string;
-    options: MapOptions;
-    setOptions?: (options: MapOptions) => void;
+    map_options: MapOptions;
+    setOptions?: (map_options: MapOptions) => void;
     onClick: (e: google.maps.MapMouseEvent) => void;
     onIdle: (map: google.maps.Map) => void;
     children?: ReactNode;
@@ -28,7 +28,7 @@ interface MapProps {
 
 export function Map({
     className,
-    options,
+    map_options,
     setOptions,
     onClick,
     onIdle,
@@ -45,15 +45,15 @@ export function Map({
 
     useDeepCompareEffect(() => {
         if (map) {
-            map.setOptions(options);
+            map.setOptions(map_options);
             setDirectionsService(new google.maps.DirectionsService());
             setDirectionsRenderer(new google.maps.DirectionsRenderer());
         }
-    }, [map, options]);
+    }, [map, map_options]);
 
     useEffect(() => {
         if (ref.current && !map && !map && !geocoder) {
-            setMap(new google.maps.Map(ref.current, options));
+            setMap(new google.maps.Map(ref.current, map_options));
             setGeocoder(new google.maps.Geocoder());
         }
         if (map) {
@@ -73,7 +73,7 @@ export function Map({
         setMap,
         onClick,
         onIdle,
-        options,
+        map_options,
         setOptions,
         DirectionsRenderer,
         geocoder,

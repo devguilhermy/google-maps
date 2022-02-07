@@ -1,21 +1,35 @@
+import { Icons, toast, ToastContainer } from 'react-toastify';
 import { LegacyRef, useRef, useState } from 'react';
 import { Map, MapOptions } from './components/Map';
 import { Marker } from './components/Marker';
 import { Status, Wrapper } from '@googlemaps/react-wrapper';
-import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export interface Itinerary {
     origin?: { location: google.maps.LatLng; address: string };
     destination?: { location: google.maps.LatLng; address: string };
-    waypoints?: { location: google.maps.DirectionsWaypoint; address: string }[];
-    origin_address?: string;
-    destination_address?: string;
-    waypoints_address?: string[];
+    waypoints?: {
+        // id: string;
+        location: google.maps.DirectionsWaypoint;
+        address: string;
+    }[];
 }
 
 export default function App() {
-    const [options, setOptions] = useState<MapOptions>({
+    // LOCATION INPUTS
+    const [input_origin, setInputOrigin] = useState<string>('');
+    const [input_destination, setInputDestination] = useState<string>('');
+    const [input_waypoint, setInputWaypoint] = useState<string>();
+    const [active_input, setActiveInput] = useState<
+        'origin' | 'destination' | 'waypoint'
+    >('origin');
+
+    // ITINERARY ------------------------------------------
+    const [itinerary, setItinerary] = useState<Itinerary>({} as Itinerary);
+
+    // MAP DEFINITIONS ------------------------------------------
+    const [map, setMap] = useState<google.maps.Map>();
+    const [map_options, setOptions] = useState<MapOptions>({
         zoom: 12,
         center: {
             lat: -16.6,
@@ -23,43 +37,30 @@ export default function App() {
         },
     });
 
-    const [itinerary, setItinerary] = useState<Itinerary>({} as Itinerary);
-    // const [invalid_point, setInvalidPoint] = useState<boolean>(false);
-
+    // GOOGLE MAPS SERVICES ------------------------------------------
+    const [geocoder, setGeocoder] = useState<google.maps.Geocoder>();
     const [DirectionsService, setDirectionsService] =
         useState<google.maps.DirectionsService>();
-    // new google.maps.DirectionsService() || undefined
     const [DirectionsRenderer, setDirectionsRenderer] =
         useState<google.maps.DirectionsRenderer>();
-    // new google.maps.DirectionsRenderer() || undefined
 
-    const [map, setMap] = useState<google.maps.Map>();
-
-    const [geocoder, setGeocoder] = useState<google.maps.Geocoder>();
-
+    // EVENTS ------------------------------------------
     const onClick = (e: google.maps.MapMouseEvent) => {
-        // console.log(e.latLng);
-
         handleItineraryChange({
-            newLocation: { location: e.latLng!, address: '' },
+            newLocation: { location: e.latLng! },
             mode: 'map_click',
         });
     };
-
-    const [active_input, setActiveInput] = useState<'origin' | 'destination'>(
-        'origin'
-    );
-
     const onIdle = (m: google.maps.Map) => {
         // console.log('onIdle');
         // setZoom(m.getZoom()!);
         // setCenter(m.getCenter()!.toJSON());
     };
-
     const render = (status: Status) => {
         return <h1>{status}</h1>;
     };
 
+    // HANDLERS ------------------------------------------
     interface HandleItineraryChangeProps {
         newLocation: {
             location?: google.maps.LatLng;
@@ -91,14 +92,14 @@ export default function App() {
                     geocoder.geocode(
                         { location: newLocation.location },
                         (results, status) => {
+                            console.log('GEOCODING --------');
+                            console.log('results', results);
+                            console.log('status', status);
+
                             // SE LOCAL EXISTIR
                             if (status === 'OK' && results && map) {
                                 // DEIXA O CAMPO DE DESTINO ATIVO
                                 setActiveInput('destination');
-
-                                console.log('GEOCODING --------');
-                                console.log('results', results);
-                                console.log('status', status);
 
                                 const geocoding = results[0];
 
@@ -131,6 +132,9 @@ export default function App() {
                                                 '',
                                             destination:
                                                 itinerary.destination.location,
+                                            waypoints: itinerary.waypoints?.map(
+                                                (waypoint) => waypoint.location
+                                            ),
                                             ...defaultOptions,
                                         };
 
@@ -209,13 +213,14 @@ export default function App() {
                     geocoder.geocode(
                         { location: newLocation.location },
                         (results, status) => {
+                            console.log('GEOCODING --------');
+                            console.log('results', results);
+                            console.log('status', status);
+
                             // SE LOCAL EXISTIR
                             if (status === 'OK' && results && map) {
                                 // DEIXA O CAMPO DE ORIGEM ATIVO
-                                setActiveInput('origin');
-                                console.log('GEOCODING --------');
-                                console.log('results', results);
-                                console.log('status', status);
+                                setActiveInput('waypoint');
 
                                 const geocoding = results[0];
 
@@ -244,6 +249,9 @@ export default function App() {
                                             origin: itinerary.origin.location,
                                             destination:
                                                 geocoding.geometry.location,
+                                            waypoints: itinerary.waypoints?.map(
+                                                (waypoint) => waypoint.location
+                                            ),
                                             ...defaultOptions,
                                         };
 
@@ -303,9 +311,138 @@ export default function App() {
                             }
                         }
                     );
+            } else if (active_input === 'waypoint') {
+                geocoder &&
+                    // BUSCA NOME DO LOCAL DIGITADO
+                    geocoder.geocode(
+                        { location: newLocation.location },
+                        (results, status) => {
+                            console.log('GEOCODING --------');
+                            console.log('results', results);
+                            console.log('status', status);
+                            console.log('address', newLocation);
+
+                            // SE LOCAL EXISTIR
+                            if (status === 'OK' && results && map) {
+                                // DEIXA O CAMPO DE ORIGEM ATIVO
+                                setActiveInput('origin');
+
+                                const geocoding = results[0];
+
+                                if (
+                                    !itinerary.origin ||
+                                    !itinerary.destination
+                                ) {
+                                    map.setCenter(geocoding.geometry.location);
+
+                                    setInputWaypoint(
+                                        geocoding.formatted_address
+                                    );
+
+                                    setItinerary({
+                                        ...itinerary,
+                                        waypoints: [
+                                            {
+                                                location: {
+                                                    location:
+                                                        geocoding.geometry
+                                                            .location,
+                                                    stopover: true,
+                                                },
+                                                address:
+                                                    geocoding.formatted_address,
+                                            },
+                                        ],
+                                    });
+                                } else if (
+                                    itinerary.origin &&
+                                    itinerary.destination
+                                ) {
+                                    const request: google.maps.DirectionsRequest =
+                                        {
+                                            origin: itinerary.origin.location,
+                                            destination:
+                                                itinerary.destination.location,
+                                            waypoints: [
+                                                {
+                                                    location:
+                                                        geocoding.geometry
+                                                            .location,
+                                                    stopover: true,
+                                                },
+                                            ],
+                                            ...defaultOptions,
+                                        };
+
+                                    // SE SERVIÇOS DE DIREÇÃO ESTIVEREM CARREGADOS
+                                    if (DirectionsService && DirectionsRenderer)
+                                        // BUSCA DIREÇÕES
+                                        DirectionsService.route(
+                                            request,
+                                            (result, status) => {
+                                                console.log(
+                                                    'DIRECTIONS ------'
+                                                );
+                                                console.log('result', result);
+                                                console.log('status', status);
+
+                                                if (status === 'OK') {
+                                                    // RENDERIZA A ROTA
+                                                    DirectionsRenderer.setDirections(
+                                                        result
+                                                    );
+
+                                                    map.setCenter(
+                                                        geocoding.geometry
+                                                            .location
+                                                    );
+
+                                                    setInputWaypoint(
+                                                        geocoding.formatted_address
+                                                    );
+
+                                                    setItinerary({
+                                                        ...itinerary,
+                                                        waypoints: [
+                                                            {
+                                                                location: {
+                                                                    location:
+                                                                        geocoding
+                                                                            .geometry
+                                                                            .location,
+                                                                    stopover:
+                                                                        true,
+                                                                },
+                                                                address:
+                                                                    geocoding.formatted_address,
+                                                            },
+                                                        ],
+                                                    });
+                                                }
+                                                // SE NÃO HOUVER RESULTADOS
+                                                else if (
+                                                    status === 'ZERO_RESULTS'
+                                                ) {
+                                                    toast(
+                                                        'Sem rotas disponíveis...'
+                                                    );
+                                                }
+                                            }
+                                        );
+                                }
+                            } else {
+                                toast(
+                                    'Geocode was not successful for the following reason: ' +
+                                        status
+                                );
+                            }
+                        }
+                    );
             }
             // BUSCA DE LOCAL POR ENDEREÇO
-        } else if (mode === 'input') {
+        }
+        // CASO TENHA DIGITADO O ENDEREÇO
+        else if (mode === 'input') {
             if (active_input === 'origin') {
                 geocoder &&
                     // GEOCODER BUSCA NOME DO LOCAL CLICADO
@@ -426,17 +563,18 @@ export default function App() {
                     );
             } else if (active_input === 'destination') {
                 geocoder &&
-                    // BUSCA NOME DO LOCAL CLICADO
+                    // BUSCA NOME DO LOCAL DIGITADO
                     geocoder.geocode(
                         { address: newLocation.address },
                         (results, status) => {
+                            console.log('GEOCODING --------');
+                            console.log('results', results);
+                            console.log('status', status);
+
                             // SE LOCAL EXISTIR
                             if (status === 'OK' && results && map) {
                                 // DEIXA O CAMPO DE ORIGEM ATIVO
                                 setActiveInput('origin');
-                                console.log('GEOCODING --------');
-                                console.log('results', results);
-                                console.log('status', status);
 
                                 const geocoding = results[0];
 
@@ -524,10 +662,109 @@ export default function App() {
                             }
                         }
                     );
+            } else if (active_input === 'waypoint') {
+                geocoder &&
+                    // BUSCA NOME DO LOCAL DIGITADO
+                    geocoder.geocode(
+                        { address: newLocation.address },
+                        (results, status) => {
+                            console.log('GEOCODING --------');
+                            console.log('results', results);
+                            console.log('status', status);
+
+                            // SE LOCAL EXISTIR
+                            if (status === 'OK' && results && map) {
+                                // DEIXA O CAMPO DE ORIGEM ATIVO
+                                setActiveInput('origin');
+
+                                const geocoding = results[0];
+
+                                if (itinerary.origin && itinerary.destination) {
+                                    const request: google.maps.DirectionsRequest =
+                                        {
+                                            origin: itinerary.origin.location,
+                                            destination:
+                                                itinerary.destination.location,
+                                            waypoints: [
+                                                {
+                                                    location:
+                                                        geocoding.geometry
+                                                            .location,
+                                                    stopover: true,
+                                                },
+                                            ],
+                                            ...defaultOptions,
+                                        };
+
+                                    // SE SERVIÇOS DE DIREÇÃO ESTIVEREM CARREGADOS
+                                    if (DirectionsService && DirectionsRenderer)
+                                        // BUSCA DIREÇÕES
+                                        DirectionsService.route(
+                                            request,
+                                            (result, status) => {
+                                                console.log(
+                                                    'DIRECTIONS ------'
+                                                );
+                                                console.log('result', result);
+                                                console.log('status', status);
+
+                                                if (status === 'OK') {
+                                                    // RENDERIZA A ROTA
+                                                    DirectionsRenderer.setDirections(
+                                                        result
+                                                    );
+
+                                                    map.setCenter(
+                                                        geocoding.geometry
+                                                            .location
+                                                    );
+
+                                                    setInputWaypoint(
+                                                        geocoding.formatted_address
+                                                    );
+
+                                                    setItinerary({
+                                                        ...itinerary,
+                                                        waypoints: [
+                                                            {
+                                                                location: {
+                                                                    location:
+                                                                        geocoding
+                                                                            .geometry
+                                                                            .location,
+                                                                    stopover:
+                                                                        true,
+                                                                },
+                                                                address:
+                                                                    geocoding.formatted_address,
+                                                            },
+                                                        ],
+                                                    });
+                                                }
+                                                // SE NÃO HOUVER RESULTADOS
+                                                else if (
+                                                    status === 'ZERO_RESULTS'
+                                                ) {
+                                                    toast(
+                                                        'Sem rotas disponíveis...'
+                                                    );
+                                                }
+                                            }
+                                        );
+                                }
+                            } else {
+                                alert(
+                                    'Geocode was not successful for the following reason: ' +
+                                        status
+                                );
+                            }
+                        }
+                    );
             }
         }
     }
 
+    // OBTER LOCAL A PARTIR DE ENDEREÇO DIGITADO
     function findAddress() {
         if (active_input === 'origin') {
             handleItineraryChange({
@@ -539,10 +776,21 @@ export default function App() {
                 newLocation: { address: input_destination },
                 mode: 'input',
             });
+        } else if (active_input === 'waypoint') {
+            handleItineraryChange({
+                newLocation: {
+                    address: input_waypoint,
+                },
+                mode: 'input',
+            });
         }
     }
-    const [input_origin, setInputOrigin] = useState('');
-    const [input_destination, setInputDestination] = useState('');
+
+    // ADICIONAR NOVO WAYPOINT
+    function newWaypoint() {
+        // setInputsWaypoints([...inputs_waypoints, { id: 'wqqwe', value: '' }]);
+        setActiveInput('waypoint');
+    }
 
     return (
         <div className="h-screen flex">
@@ -573,6 +821,26 @@ export default function App() {
                     onChange={(e) => setInputDestination(e.target.value)}
                     onFocus={() => setActiveInput('destination')}
                 />
+                {/* {inputs_waypoints.map((waypoint) => {
+                    return ( */}
+                <input
+                    type="text"
+                    className="px-3 py-2 bg-gray-100 rounded-xl"
+                    placeholder="Parada"
+                    value={input_waypoint}
+                    onChange={(e) => setInputWaypoint(e.target.value)}
+                    onFocus={() => setActiveInput('waypoint')}
+                />
+                {/* );
+                })} */}
+                <button
+                    // type="submit"
+                    className="px-3 py-2 bg-gray-300 rounded-xl"
+                    onClick={newWaypoint}
+                >
+                    {/* <FaPlus /> */}
+                    Nova parada
+                </button>
                 <button
                     // type="submit"
                     className="px-3 py-2 bg-blue-500 rounded-xl"
@@ -590,7 +858,7 @@ export default function App() {
                     <Map
                         map={map as google.maps.Map}
                         setMap={setMap}
-                        options={options}
+                        map_options={map_options}
                         setOptions={setOptions}
                         className="h-screen"
                         onClick={onClick}
