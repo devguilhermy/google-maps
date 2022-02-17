@@ -52,7 +52,7 @@ export function Map({
     }, [map, map_options]);
 
     useEffect(() => {
-        if (ref.current && !map && !map && !geocoder) {
+        if (ref.current && !map && !geocoder) {
             setMap(new google.maps.Map(ref.current, map_options));
             setGeocoder(new google.maps.Geocoder());
         }
@@ -65,7 +65,7 @@ export function Map({
 
             map.addListener('click', onClick);
 
-            onIdle && map.addListener('idle', () => onIdle(map));
+            map.addListener('idle', () => onIdle(map));
         }
     }, [
         ref,

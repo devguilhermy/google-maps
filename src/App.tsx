@@ -2,7 +2,12 @@ import { Map, MapOptions } from './components/Map';
 import { Marker } from './components/Marker';
 import { Status, Wrapper } from '@googlemaps/react-wrapper';
 import { toast, ToastContainer } from 'react-toastify';
-import { useEffect, useMemo, useState } from 'react';
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useState
+	} from 'react';
 import 'react-toastify/dist/ReactToastify.css';
 
 type ActiveInput = 'origin' | 'destination' | 'waypoint';
@@ -43,11 +48,6 @@ export default function App() {
         useState<google.maps.DirectionsService>();
     const [DirectionsRenderer, setDirectionsRenderer] =
         useState<google.maps.DirectionsRenderer>();
-
-    // OBTÉM DIREÇÕES SE ITINERÁRIO FOR MUDADO
-    useEffect(() => {
-        getDirections();
-    }, [itinerary, getDirections]);
 
     // HANDLERS ------------------------------------------
 
@@ -194,7 +194,7 @@ export default function App() {
         return geocoding;
     }
 
-    function getDirections() {
+    const getDirections = useCallback(() => {
         if (itinerary) {
             if (itinerary.origin && itinerary.destination) {
                 if (DirectionsService && DirectionsRenderer) {
@@ -234,7 +234,12 @@ export default function App() {
                 }
             }
         }
-    }
+    }, [itinerary, DirectionsRenderer, DirectionsService]);
+
+    // OBTÉM DIREÇÕES SE ITINERÁRIO FOR MUDADO
+    useEffect(() => {
+        getDirections();
+    }, [itinerary, getDirections]);
 
     return (
         <div className="h-screen flex">
